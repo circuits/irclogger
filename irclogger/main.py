@@ -10,6 +10,7 @@ For usage type:
 
 from socket import gethostname
 from optparse import OptionParser
+from collections import defaultdict
 from re import compile as compile_regex
 from datetime import date, datetime, timedelta
 from os import environ, getcwd, makedirs, path
@@ -140,6 +141,12 @@ class Bot(Component):
         self.nick = opts.nick
         self.ircchannels = opts.channels
 
+        # Mapping of IRC Channel -> Set of Nicks
+        self.chanmap = defaultdict(set)
+
+        # Mapping of Nick -> Set of IRC Channels
+        self.nickmap = defaultdict(set)
+
         # Debugger
         Debugger(events=opts.verbose).register(self)
 
@@ -211,7 +218,35 @@ class Bot(Component):
         user has joined a channel.
         """
 
-        self.fire(Log("[{0:s} has joined {1:s}]".format(source[0], channel)), "logger.{0:s}".format(channel))
+        self.chanmap[channel].add(source[0])
+        self.nickmap[source[0]].add(channel)
+
+        self.fire(Log("*** {0:s} has joined {1:s}".format(source[0], channel)), "logger.{0:s}".format(channel))
+
+    def part(self, source, channel):
+        """Part Event
+
+        This event is triggered by the ``IRC`` Protocol Component when a
+        user has left a channel.
+        """
+
+        self.chanmap[channel].remove(source[0])
+        self.nickmap[source[0]].remove(channel)
+
+        self.fire(Log("*** {0:s} has left {1:s}".format(source[0], channel)), "logger.{0:s}".format(channel))
+
+    def quit(self, source, message):
+        """Quit Event
+
+        This event is triggered by the ``IRC`` Protocol Component when a
+        user has quit the network.
+        """
+
+        for ircchannel in self.nickmap[source[0]]:
+            self.chanmap[ircchannel].remove(source[0])
+            self.fire(Log("*** {0:s} has quit IRC".format(source[0])), "logger.{0:s}".format(ircchannel))
+
+        del self.nickmap[source[0]]
 
     def message(self, source, target, message):
         """Message Event
