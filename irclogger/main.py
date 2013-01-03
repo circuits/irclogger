@@ -10,9 +10,9 @@ For usage type:
 
 from socket import gethostname
 from optparse import OptionParser
-from os import environ, getcwd, path
 from re import compile as compile_regex
 from datetime import date, datetime, timedelta
+from os import environ, getcwd, makedirs, path
 from time import asctime, localtime, strftime, time
 
 import circuits
@@ -90,7 +90,7 @@ def timestamp():
 
 
 def generate_logfile(channel):
-    return "{0:s}.{1:s}.log".format(channel, strftime("%Y-%m-%d", localtime()))
+    return path.join(channel, "{0:s}.log".format(channel, strftime("%Y-%m-%d", localtime())))
 
 
 def parse_logfile(filename):
@@ -148,6 +148,8 @@ class Bot(Component):
 
         # Logger(s)
         for ircchannel in self.ircchannels:
+            if not path.exists(path.join(opts.output, ircchannel)):
+                makedirs(path.join(opts.output, ircchannel))
             Logger(path.join(opts.output, generate_logfile(ircchannel)), "a", channel="logger.{0:s}".format(ircchannel)).register(self)
 
         # Daemon?
