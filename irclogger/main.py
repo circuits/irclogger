@@ -179,10 +179,7 @@ class Bot(Component):
         user has joined a channel.
         """
 
-        if source[0].lower() == self.nick.lower():
-            self.fire(Log("[I have joined {0:s}]".format(channel)))
-        else:
-            self.fire(Log("[{0:s} has joined {1:s}]".format(source, channel)))
+        self.fire(Log("[{0:s} has joined {1:s}]".format(source, channel)))
 
     def message(self, source, target, message):
         """Message Event
@@ -193,7 +190,7 @@ class Bot(Component):
 
         # Only log messages to the channel we're on
         if target[0] == "#":
-            self.fire(Log("<{0:s}> {1:s}".format(source, message)))
+            self.fire(Log("<{0:s}> {1:s}".format(source[0], message)))
 
 
 def main():
