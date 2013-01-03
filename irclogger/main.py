@@ -179,8 +179,6 @@ class Bot(Component):
         when a successfully connection has been made.
         """
 
-        self.fire(Log("[connected at {0:s}]".format(timestamp())))
-
         nick = self.nick
         hostname = self.hostname
         name = "%s on %s using circuits/%s" % (nick, hostname, circuits.__version__)
