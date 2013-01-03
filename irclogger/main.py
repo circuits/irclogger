@@ -8,17 +8,18 @@ For usage type:
 """
 
 
-import os
-from os import path
 from socket import gethostname
 from optparse import OptionParser
+from os import environ, getcwd, path
+from re import compile as compile_regex
+from datetime import date, datetime, timedelta
 from time import asctime, localtime, strftime, time
 
 import circuits
 from circuits.app import Daemon
-from circuits.io import File, Write
-from circuits import Component, Event, Debugger
+from circuits.io import Close, File, Open, Write
 from circuits.net.sockets import TCPClient, Connect
+from circuits import Component, Event, Debugger, Timer
 from circuits.net.protocols.irc import IRC, USER, NICK, JOIN
 
 from . import __name__, __version__
@@ -26,7 +27,7 @@ from . import __name__, __version__
 USAGE = "%prog [options] <host> [<port>]"
 VERSION = "%prog v" + __version__
 
-FILENAME = path.join(path.dirname(__file__), "{0:s}.log".format(__name__))
+LOGFILE_REGEX = compile_regex("^(.*)\.(.*)\.log$")
 PIDFILE = path.join(path.dirname(__file__), "{0:s}.pid".format(__name__))
 
 
@@ -41,20 +42,20 @@ def parse_options():
 
     parser.add_option(
         "-c", "--channel",
-        action="store", default="#circuits", dest="channel",
-        help="Channel to join"
-    )
-
-    parser.add_option(
-        "-f", "--filename",
-        action="store", default=FILENAME, dest="filename",
-        help="Filename to log to"
+        action="append", default=["#circuits", "#circuits-dev"], dest="channels",
+        help="Channel to join (multiple allowed)"
     )
 
     parser.add_option(
         "-n", "--nick",
-        action="store", default=os.environ["USER"], dest="nick",
+        action="store", default=environ["USER"], dest="nick",
         help="Nickname to use"
+    )
+
+    parser.add_option(
+        "-o", "--output",
+        action="store", default=getcwd(), dest="output",
+        help="Path to store log files"
     )
 
     parser.add_option(
@@ -82,15 +83,36 @@ def timestamp():
     return asctime(localtime(time()))
 
 
+def generate_logfile(channel):
+    return "{0:s}-{1:s}.log".format(strftime("%Y-%m-%d", localtime()))
+
+
+def parse_logfile(filename):
+    match = LOGFILE_REGEX.match(filename)
+    return match.groups() if match is not None else "", ""
+
+
 class Log(Event):
     """Log Event"""
 
-    channels = ("logger",)
+
+class Rotate(Event):
+    """Rotate Event"""
 
 
 class Logger(File):
 
-    channel = "logger"
+    def init(self, *args, **kwargs):
+        interval = datetime.fromordinal((date.today() + timedelta(1)).toordinal())
+        Timer(interval, Rotate(), channel=self.channel).register(self)
+
+    def rotate(self):
+        dirname = path.dirname(self.filename)
+        filename = path.basename(self.filename)
+        channel, _ = parse_logfile(filename)
+        logfile = generate_logfile(channel)
+        self.fire(Close(), self.channel)
+        self.fire(Open(path.join(dirname, logfile), "a"), self.channel)
 
     def log(self, message):
         timestamp = strftime("[%H:%M:%S]", localtime(time()))
@@ -108,7 +130,7 @@ class Bot(Component):
         self.hostname = gethostname()
 
         self.nick = opts.nick
-        self.ircchannel = opts.channel
+        self.ircchannels = opts.channels
 
         # Debugger
         Debugger(events=opts.verbose).register(self)
@@ -116,8 +138,9 @@ class Bot(Component):
         # Add TCPClient and IRC to the system.
         self += (TCPClient(channel=self.channel) + IRC(channel=self.channel))
 
-        # Logger
-        Logger(opts.filename, "a").register(self)
+        # Logger(s)
+        for ircchannel in self.ircchannels:
+            Logger(path.join(opts.output, generate_logfile(ircchannel)), channel="logger.{0:s}".format(ircchannel)).register(self)
 
         # Daemon?
         if self.opts.daemon:
@@ -167,7 +190,8 @@ class Bot(Component):
         """
 
         if numeric == 1:
-            self.fire(JOIN(self.ircchannel))
+            for ircchannel in self.ircchannels:
+                self.fire(JOIN(ircchannel))
         elif numeric == 433:
             self.nick = newnick = "%s_" % self.nick
             self.fire(NICK(newnick))
