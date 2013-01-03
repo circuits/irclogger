@@ -42,7 +42,7 @@ def parse_options():
 
     parser.add_option(
         "-c", "--channel",
-        action="append", default=["#circuits", "#circuits-dev"], dest="channels",
+        action="append", default=None, dest="channels",
         help="Channel to join (multiple allowed)"
     )
 
@@ -72,7 +72,13 @@ def parse_options():
 
     opts, args = parser.parse_args()
 
+    if not opts.channels:
+        print("ERROR: Must specify at least one channel")
+        parser.print_help()
+        raise SystemExit(2)
+
     if len(args) < 1:
+        print("ERROR: Must specify a host to connect to")
         parser.print_help()
         raise SystemExit(1)
 
@@ -84,7 +90,7 @@ def timestamp():
 
 
 def generate_logfile(channel):
-    return "{0:s}-{1:s}.log".format(strftime("%Y-%m-%d", localtime()))
+    return "{0:s}.{1:s}.log".format(channel, strftime("%Y-%m-%d", localtime()))
 
 
 def parse_logfile(filename):
@@ -103,8 +109,10 @@ class Rotate(Event):
 class Logger(File):
 
     def init(self, *args, **kwargs):
+        super(Logger, self).init(*args, **kwargs)
+
         interval = datetime.fromordinal((date.today() + timedelta(1)).toordinal())
-        Timer(interval, Rotate(), channel=self.channel).register(self)
+        Timer(interval, Rotate(), self.channel).register(self)
 
     def rotate(self):
         dirname = path.dirname(self.filename)
@@ -140,7 +148,7 @@ class Bot(Component):
 
         # Logger(s)
         for ircchannel in self.ircchannels:
-            Logger(path.join(opts.output, generate_logfile(ircchannel)), channel="logger.{0:s}".format(ircchannel)).register(self)
+            Logger(path.join(opts.output, generate_logfile(ircchannel)), "a", channel="logger.{0:s}".format(ircchannel)).register(self)
 
         # Daemon?
         if self.opts.daemon:
@@ -178,8 +186,6 @@ class Bot(Component):
         when the active connection has been terminated.
         """
 
-        self.fire(Log("[disconnected at {0:s}]".format(timestamp())))
-
         self.fire(Connect(self.host, self.port))
 
     def numeric(self, source, target, numeric, args, message):
@@ -203,7 +209,7 @@ class Bot(Component):
         user has joined a channel.
         """
 
-        self.fire(Log("[{0:s} has joined {1:s}]".format(source[0], channel)))
+        self.fire(Log("[{0:s} has joined {1:s}]".format(source[0], channel)), "logger.{0:s}".format(channel))
 
     def message(self, source, target, message):
         """Message Event
@@ -214,7 +220,7 @@ class Bot(Component):
 
         # Only log messages to the channel we're on
         if target[0] == "#":
-            self.fire(Log("<{0:s}> {1:s}".format(source[0], message)))
+            self.fire(Log("<{0:s}> {1:s}".format(source[0], message)), "logger.{0:s}".format(target))
 
 
 def main():
@@ -222,6 +228,8 @@ def main():
 
     host = args[0]
     port = int(args[1]) if len(args) > 1 else 6667
+
+    opts.output = path.abspath(path.expanduser(opts.output))
 
     # Configure and run the system.
     Bot(host, port, opts=opts).run()
