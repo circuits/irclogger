@@ -191,9 +191,8 @@ class Bot(Component):
         message we receieve from the server.
         """
 
+        # Only log messages to the channel we're on
         if target[0] == "#":
-            self.fire(Log("<{0:s}> {1:s}".format(target, message)))
-        else:
             self.fire(Log("<{0:s}> {1:s}".format(source, message)))
 
 
