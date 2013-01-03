@@ -90,7 +90,7 @@ def timestamp():
 
 
 def generate_logfile(channel):
-    return path.join(channel, "{0:s}.log".format(channel, strftime("%Y-%m-%d", localtime())))
+    return path.join(channel, "{0:s}.log".format(strftime("%Y-%m-%d", localtime())))
 
 
 def parse_logfile(filename):
