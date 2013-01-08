@@ -123,6 +123,9 @@ class Logger(File):
         self.fire(Close(), self.channel)
         self.fire(Open(path.join(dirname, logfile), "a"), self.channel)
 
+        interval = datetime.fromordinal((date.today() + timedelta(1)).toordinal())
+        Timer(interval, Rotate(), self.channel).register(self)
+
     def log(self, message):
         timestamp = strftime("[%H:%M:%S]", localtime(time()))
         self.fire(Write("{0:s} {1:s}\n".format(timestamp, message)), self.channel)
