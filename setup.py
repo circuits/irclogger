@@ -36,7 +36,7 @@ except IOError:
 
 setup(
     name="irclogger",
-    version="0.0.1dev",
+    version='0.0.1',
     description="Python IRC Logger Daemon",
     long_description="%s\n\n%s" % (README, RELEASE),
     author="James Mills",
