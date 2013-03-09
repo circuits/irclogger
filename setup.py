@@ -34,12 +34,10 @@ try:
 except IOError:
     README = RELEASE = ""
 
-import irclogger
-
 setup(
-    name=irclogger.__name__,
-    version=irclogger.__version__,
-    description=irclogger.__doc__.split()[0],
+    name="irclogger",
+    version="0.0.1dev",
+    description="Python IRC Logger Daemon",
     long_description="%s\n\n%s" % (README, RELEASE),
     author="James Mills",
     author_email="James Mills, prologic at shortcircuit dot net dot au",
