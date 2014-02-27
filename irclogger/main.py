@@ -128,7 +128,7 @@ class Logger(File):
 
     def log(self, message):
         timestamp = strftime("[%H:%M:%S]", localtime(time()))
-        self.fire(Write("{0:s} {1:s}\n".format(timestamp, message)), self.channel)
+        self.fire(Write(u"{0:s} {1:s}\n".format(timestamp, message).encode("utf-8")), self.channel)
 
 
 class Bot(Component):
@@ -166,6 +166,9 @@ class Bot(Component):
         if self.opts.daemon:
             Daemon(opts.pidfile).register(self)
 
+        # Keep-Alive Timer
+        Timer(60, Event.create("KeepAlive"), persist=True).register(self)
+
     def ready(self, component):
         """Ready Event
 
@@ -174,6 +177,9 @@ class Bot(Component):
         """
 
         self.fire(Connect(self.host, self.port))
+
+    def keep_alive(self):
+        self.fire(Write(b"\x00"))
 
     def connected(self, host, port):
         """Connected Event
@@ -258,7 +264,7 @@ class Bot(Component):
 
         # Only log messages to the channel we're on
         if target[0] == "#":
-            self.fire(Log("<{0:s}> {1:s}".format(source[0], message)), "logger.{0:s}".format(target))
+            self.fire(Log(u"<{0:s}> {1:s}".format(source[0], message)), "logger.{0:s}".format(target))
 
 
 def main():
