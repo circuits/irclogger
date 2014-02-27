@@ -91,7 +91,9 @@ def timestamp():
 
 
 def generate_logfile(channel):
-    return path.join(channel, "{0:s}.log".format(strftime("%Y-%m-%d", localtime())))
+    return path.join(channel, "{0:s}.log".format(
+        strftime("%Y-%m-%d", localtime()))
+    )
 
 
 def parse_logfile(filename):
@@ -112,7 +114,9 @@ class Logger(File):
     def init(self, *args, **kwargs):
         super(Logger, self).init(*args, **kwargs)
 
-        interval = datetime.fromordinal((date.today() + timedelta(1)).toordinal())
+        interval = datetime.fromordinal((
+            date.today() + timedelta(1)
+        ).toordinal())
         Timer(interval, Rotate(), self.channel).register(self)
 
     def rotate(self):
@@ -123,7 +127,9 @@ class Logger(File):
         self.fire(Close(), self.channel)
         self.fire(Open(path.join(dirname, logfile), "a"), self.channel)
 
-        interval = datetime.fromordinal((date.today() + timedelta(1)).toordinal())
+        interval = datetime.fromordinal((
+            date.today() + timedelta(1)
+        ).toordinal())
         Timer(interval, Rotate(), self.channel).register(self)
 
     def log(self, message):
@@ -160,7 +166,8 @@ class Bot(Component):
         for ircchannel in self.ircchannels:
             if not path.exists(path.join(opts.output, ircchannel)):
                 makedirs(path.join(opts.output, ircchannel))
-            Logger(path.join(opts.output, generate_logfile(ircchannel)), "a", channel="logger.{0:s}".format(ircchannel)).register(self)
+            Logger(path.join(opts.output, generate_logfile(ircchannel)), "a",
+                   channel="logger.{0:s}".format(ircchannel)).register(self)
 
         # Daemon?
         if self.opts.daemon:
@@ -190,7 +197,9 @@ class Bot(Component):
 
         nick = self.nick
         hostname = self.hostname
-        name = "%s on %s using circuits/%s" % (nick, hostname, circuits.__version__)
+        name = "{0:s} on {1:s} using circuits/{2:s}".format(
+            nick, hostname, circuits.__version__
+        )
 
         self.fire(USER(nick, hostname, host, name))
         self.fire(NICK(nick))
@@ -228,7 +237,10 @@ class Bot(Component):
         self.chanmap[channel].add(source[0])
         self.nickmap[source[0]].add(channel)
 
-        self.fire(Log("*** {0:s} has joined {1:s}".format(source[0], channel)), "logger.{0:s}".format(channel))
+        self.fire(
+            Log("*** {0:s} has joined {1:s}".format(source[0], channel)),
+            "logger.{0:s}".format(channel)
+        )
 
     def part(self, source, channel):
         """Part Event
@@ -240,7 +252,10 @@ class Bot(Component):
         self.chanmap[channel].remove(source[0])
         self.nickmap[source[0]].remove(channel)
 
-        self.fire(Log("*** {0:s} has left {1:s}".format(source[0], channel)), "logger.{0:s}".format(channel))
+        self.fire(
+            Log("*** {0:s} has left {1:s}".format(source[0], channel)),
+            "logger.{0:s}".format(channel)
+        )
 
     def quit(self, source, message):
         """Quit Event
@@ -251,7 +266,10 @@ class Bot(Component):
 
         for ircchannel in self.nickmap[source[0]]:
             self.chanmap[ircchannel].remove(source[0])
-            self.fire(Log("*** {0:s} has quit IRC".format(source[0])), "logger.{0:s}".format(ircchannel))
+            self.fire(
+                Log("*** {0:s} has quit IRC".format(source[0])),
+                "logger.{0:s}".format(ircchannel)
+            )
 
         del self.nickmap[source[0]]
 
