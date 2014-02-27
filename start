@@ -1,0 +1,3 @@
+#!/bin/bash
+
+nohup irclogger -c "#circuits" -c "#circuits-dev" -c "#crux" -c "#crux-devel" -c "#io" -n irclogger -o ./tmp/irclogs/ irc.freenode.net &> log &
