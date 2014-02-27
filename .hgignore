@@ -3,6 +3,7 @@ syntax: glob
 *.pyc
 *.pyo
 *.log
+log
 tmp
 dist
 build
