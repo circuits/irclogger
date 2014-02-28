@@ -242,7 +242,7 @@ class Bot(Component):
             "logger.{0:s}".format(channel)
         )
 
-    def part(self, source, channel):
+    def part(self, source, channel, reason=None):
         """Part Event
 
         This event is triggered by the ``IRC`` Protocol Component when a
@@ -253,7 +253,7 @@ class Bot(Component):
         self.nickmap[source[0]].remove(channel)
 
         self.fire(
-            Log("*** {0:s} has left {1:s}".format(source[0], channel)),
+            Log("*** {0:s} has left {1:s} ({2:s})".format(source[0], channel, reason or "")),
             "logger.{0:s}".format(channel)
         )
 
