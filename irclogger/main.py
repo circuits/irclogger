@@ -11,6 +11,7 @@ For usage type:
 from socket import gethostname
 from optparse import OptionParser
 from collections import defaultdict
+from socket import error as SocketError
 from re import compile as compile_regex
 from datetime import date, datetime, timedelta
 from os import environ, getcwd, makedirs, path
@@ -160,7 +161,8 @@ class Bot(Component):
         Debugger(events=opts.verbose).register(self)
 
         # Add TCPClient and IRC to the system.
-        self += (TCPClient(channel=self.channel) + IRC(channel=self.channel))
+        self.transport = TCPClient(channel=self.channel).register(self)
+        self.protocol = IRC(channel=self.channel).register(self)
 
         # Logger(s)
         for ircchannel in self.ircchannels:
@@ -187,6 +189,11 @@ class Bot(Component):
 
     def keep_alive(self):
         self.fire(Write(b"\x00"))
+
+    def error(self, etype, evalue, etraceback, handler=None):
+        if isinstance(evalue, SocketError):
+            if not self.transport.connected:
+                Timer(5, Connect(self.host, self.port)).register(self)
 
     def connected(self, host, port):
         """Connected Event
