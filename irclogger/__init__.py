@@ -20,4 +20,4 @@ understand and parse.
 
 __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 __date__ = "4th October 2014"
-__version__ = "0.0.2"
+__version__ = "0.0.3dev"
