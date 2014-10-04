@@ -1,14 +1,17 @@
-Changelog for irclogger
+.. _circuits 3.0: https://pypi.python.org/pypi/circuits/3.0
+
+
+ChangeLog for irclogger
 =======================
 
 
-0.0.2 (unreleased)
-------------------
+0.0.2 (*yyyy-mm-dd*)
+--------------------
 
-- Nothing changed yet.
+- Updated to use `circuits 3.0`_
 
 
-0.0.1 (2013-03-10)
-------------------
+0.0.1 (*2013-03-10*)
+--------------------
 
 - Initial Release
