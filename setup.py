@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 version = "0.0.3dev"
 url = "https://bitbucket.org/prologic/irclogger"
-download_url = "{0:s}/get/{0:s}.zip".format(version)
+download_url = "{0:s}/get/{1:s}.zip".format(url, version)
 
 
 setup(
