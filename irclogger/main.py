@@ -191,7 +191,7 @@ class Bot(Component):
 
             Logger(
                 path.join(opts.output, generate_logfile(ircchannel)), "a",
-                hannel="logger.{0:s}".format(ircchannel)
+                channel="logger.{0:s}".format(ircchannel)
             ).register(self)
 
         # Daemon?
