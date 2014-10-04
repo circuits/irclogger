@@ -2,6 +2,7 @@
 # Date:     3rd January 2013
 # Author:   James Mills, prologic at shortcircuit dot net dot au
 
+
 """irclogger - Python IRC Logger Daemon
 
 irclogger is a simple daemon written in the `Python Programming Language`_
@@ -15,6 +16,7 @@ understand and parse.
 .. _circuits: http://circuitsframework.com/
 .. _irclog2html: http://pypi.python.org/pypi/irclog2html
 """
+
 
 __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 __date__ = "3rd January 2013"

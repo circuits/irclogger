@@ -1,54 +1,31 @@
 #!/usr/bin/env python
 
-import os
-from glob import glob
-from distutils.util import convert_path
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
-def find_packages(where=".", exclude=()):
-    """Borrowed directly from setuptools"""
+version = "0.0.2dev"
+url = "https://bitbucket.org/prologic/irclogger"
+download_url = "{0:s}/get/{0:s}.zip".format(version)
 
-    out = []
-    stack = [(convert_path(where), "")]
-    while stack:
-        where, prefix = stack.pop(0)
-        for name in os.listdir(where):
-            fn = os.path.join(where, name)
-            if ("." not in name and os.path.isdir(fn) and
-                    os.path.isfile(os.path.join(fn, "__init__.py"))):
-                out.append(prefix + name)
-                stack.append((fn, prefix + name + "."))
-
-    from fnmatch import fnmatchcase
-    for pat in list(exclude) + ["ez_setup"]:
-        out = [item for item in out if not fnmatchcase(item, pat)]
-
-    return out
-
-path = os.path.abspath(os.path.dirname(__file__))
-try:
-    README = open(os.path.join(path, "README.rst")).read()
-    RELEASE = open(os.path.join(path, "RELEASE.rst")).read()
-except IOError:
-    README = RELEASE = ""
 
 setup(
     name="irclogger",
-    version='0.0.2.dev0',
+    version=version,
     description="Python IRC Logger Daemon",
-    long_description="%s\n\n%s" % (README, RELEASE),
+    long_description="{0:s}\n\n{1:s}".format(
+        open("README.rst", "r").read(),
+        open("CHANGES.rst", "r").read()
+    ),
     author="James Mills",
     author_email="James Mills, prologic at shortcircuit dot net dot au",
-    url="TBA",
-    download_url="TBA",
+    url=url,
+    download_url=download_url,
     classifiers=[],
     license="MIT",
     keywords="Python IRC Logger Daemon",
     platforms="POSIX",
     packages=find_packages("."),
-    scripts=glob("scripts/*"),
     install_requires=[
         "circuits",
     ],
@@ -56,6 +33,5 @@ setup(
         "console_scripts": [
             "irclogger=irclogger.main:main"
         ]
-    },
-    zip_safe=False
+    }
 )
