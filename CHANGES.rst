@@ -5,7 +5,7 @@ ChangeLog for irclogger
 =======================
 
 
-0.0.2 (*yyyy-mm-dd*)
+0.0.2 (*2014-10-04*)
 --------------------
 
 - Updated to use `circuits 3.0`_
