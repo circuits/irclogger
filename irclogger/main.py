@@ -9,6 +9,8 @@ For usage type:
 """
 
 
+from __future__ import print_function
+
 from socket import gethostname
 from optparse import OptionParser
 from collections import defaultdict
@@ -121,17 +123,26 @@ class Logger(File):
         interval = datetime.fromordinal((
             date.today() + timedelta(1)
         ).toordinal())
+
+        print("Next log roration set for: {}".format(interval.strftime("%Y-%m-%d %H:%M:%S")))
+
         Timer(interval, rotate(), self.channel).register(self)
 
     def rotate(self):
-        channel = dirname = path.dirname(self.filename)
+        channel = path.dirname(self.filename)
+        dirname = path.dirname(channel)
         logfile = generate_logfile(channel)
         self.fire(close(), self.channel)
         self.fire(open(path.join(dirname, logfile), "a"), self.channel)
 
+        print("Log rotated")
+
         interval = datetime.fromordinal((
             date.today() + timedelta(1)
         ).toordinal())
+
+        print("Next log roration set for: {}".format(interval.strftime("%Y-%m-%d %H:%M:%S")))
+
         Timer(interval, rotate(), self.channel).register(self)
 
     def log(self, message):
