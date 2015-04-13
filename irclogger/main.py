@@ -13,10 +13,9 @@ from socket import gethostname
 from optparse import OptionParser
 from collections import defaultdict
 from socket import error as SocketError
-from re import compile as compile_regex
+from time import localtime, strftime, time
 from datetime import date, datetime, timedelta
 from os import environ, getcwd, makedirs, path
-from time import asctime, localtime, strftime, time
 
 
 import circuits
@@ -42,7 +41,7 @@ from . import __name__, __version__
 USAGE = "%prog [options] <host> [<port>]"
 VERSION = "%prog v" + __version__
 
-LOGFILE_REGEX = compile_regex("^(.*)\.(.*)\.log$")
+
 PIDFILE = path.join(path.dirname(__file__), "{0:s}.pid".format(__name__))
 
 
@@ -100,19 +99,10 @@ def parse_options():
     return opts, args
 
 
-def timestamp():
-    return asctime(localtime(time()))
-
-
 def generate_logfile(channel):
     return path.join(channel, "{0:s}.log".format(
         strftime("%Y-%m-%d", localtime()))
     )
-
-
-def parse_logfile(filename):
-    match = LOGFILE_REGEX.match(filename)
-    return match.groups() if match is not None else "", ""
 
 
 class log(Event):
@@ -134,9 +124,7 @@ class Logger(File):
         Timer(interval, rotate(), self.channel).register(self)
 
     def rotate(self):
-        dirname = path.dirname(self.filename)
-        filename = path.basename(self.filename)
-        channel, _ = parse_logfile(filename)
+        channel = dirname = path.dirname(self.filename)
         logfile = generate_logfile(channel)
         self.fire(close(), self.channel)
         self.fire(open(path.join(dirname, logfile), "a"), self.channel)
