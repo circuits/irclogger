@@ -129,13 +129,12 @@ class Logger(File):
         Timer(interval, rotate(), self.channel).register(self)
 
     def rotate(self):
-        channel = path.dirname(self.filename)
-        dirname = path.dirname(channel)
+        channel_dir = path.dirname(self.filename)
+        output_dir = path.dirname(channel_dir)
+        channel = path.basename(channel_dir)
         logfile = generate_logfile(channel)
         self.fire(close(), self.channel)
-        self.fire(open(path.join(dirname, logfile), "a"), self.channel)
-
-        print("Log rotated")
+        self.fire(open(path.join(output_dir, logfile), "a"), self.channel)
 
         interval = datetime.fromordinal((
             date.today() + timedelta(1)
