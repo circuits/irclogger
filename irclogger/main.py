@@ -27,7 +27,8 @@ from circuits import handler, Component, Event, Debugger, Timer
 from circuits.app import Daemon
 
 from circuits.io import File
-from circuits.io.events import close, open, write
+from circuits.io.file import _open
+from circuits.io.events import close, write
 
 from circuits.net.events import connect
 from circuits.net.sockets import TCPClient
@@ -134,7 +135,7 @@ class Logger(File):
         channel = path.basename(channel_dir)
         logfile = generate_logfile(channel)
         self.fire(close(), self.channel)
-        self.fire(open(path.join(output_dir, logfile), "a"), self.channel)
+        self.fire(_open(path.join(output_dir, logfile), "a"), self.channel)
 
         interval = datetime.fromordinal((
             date.today() + timedelta(1)
