@@ -11,10 +11,10 @@ For usage type:
 
 from __future__ import print_function
 
+from uuid import uuid4 as uuid
 from socket import gethostname
 from optparse import OptionParser
 from collections import defaultdict
-from socket import error as SocketError
 from time import localtime, strftime, time
 from datetime import date, datetime, timedelta
 from os import environ, getcwd, makedirs, path
@@ -48,6 +48,13 @@ VERSION = "%prog v" + __version__
 PIDFILE = path.join(path.dirname(__file__), "{0:s}.pid".format(__name__))
 
 
+def randnick():
+    x = uuid().hex
+    xs = map(str.isalpha, x)
+    i = xs.index(True)
+    return x[i:][:10]
+
+
 def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
 
@@ -65,7 +72,7 @@ def parse_options():
 
     parser.add_option(
         "-n", "--nick",
-        action="store", default=environ["USER"], dest="nick",
+        action="store", default=environ.get("USER", randnick()), dest="nick",
         help="Nickname to use"
     )
 
@@ -212,10 +219,10 @@ class Bot(Component):
     def keepalive(self):
         self.fire(write(b"\x00"))
 
-    def error(self, etype, evalue, etraceback, handler=None):
-        if isinstance(evalue, SocketError):
-            if not self.transport.connected:
-                Timer(5, connect(self.host, self.port)).register(self)
+    def error(self, *args):
+        print("ERROR:", args)
+        if not self.transport.connected:
+            Timer(5, connect(self.host, self.port)).register(self)
 
     def connected(self, host, port):
         """Connected Event
