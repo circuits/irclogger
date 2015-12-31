@@ -1,0 +1,10 @@
+*~
+log
+tmp
+dist
+*.bak
+build
+*.py[co]
+*.egg-info
+Dockerfile
+.dockerignore
