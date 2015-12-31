@@ -2,8 +2,8 @@
 .. _circuits: http://pypi.python.org/pypi/circuits
 .. _irclog2html: http://pypi.python.org/pypi/irclog2html
 
-.. image:: https://badge.imagelayers.io/prologic/irclogger:latest.svg
-   :target: https://imagelayers.io/?images=prologic/irclogger:latest
+.. image:: https://badge.imagelayers.io/circuits/irclogger:latest.svg
+   :target: https://imagelayers.io/?images=circuits/irclogger:latest
    :alt: Image Layers
 
 irclogger is a simple daemon written in the `Python Programming Language`_ utilizing the `circuits`_ framework for the sole purpose of logging a set of IRC
